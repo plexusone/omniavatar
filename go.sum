@@ -167,6 +167,8 @@ github.com/plexusone/bithuman-go v0.1.0 h1:/11rTArQCshNL5k0jZj0hmTCpc4rkKrScAgsJ
 github.com/plexusone/bithuman-go v0.1.0/go.mod h1:7x8URlC4Jqu83w9DQk+C+Ab/dWWFgYV5jkPafyg+PyM=
 github.com/plexusone/heygen-go v0.1.0 h1:igJpBniX/32WpkWlvkoWy4YyWapwVAzo1Xp4ooguPug=
 github.com/plexusone/heygen-go v0.1.0/go.mod h1:WDrzkUmV27EBr4LgGyZOd2sQ99kqcOAD+3yBlZHtOdA=
+github.com/plexusone/omniavatar-core v0.1.0 h1:Bx1HIN1pKRvzkbflJMmsXmwqcGRIjOecdx1CuFuxaIE=
+github.com/plexusone/omniavatar-core v0.1.0/go.mod h1:vp9MofUv8Z0LP8lBk1NsGPlO1XxcZkoJSTkH3wHoh6k=
 github.com/plexusone/tavus-go v0.2.0 h1:iESPhcM1yCucE27SOZEV9txm9z9iIERqHLU2++ZpVlw=
 github.com/plexusone/tavus-go v0.2.0/go.mod h1:w2S8sEH1p88AQVmQiYni0RDZGs7+dhZhPoeaw6CuPgA=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
