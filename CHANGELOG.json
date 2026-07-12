@@ -1,0 +1,37 @@
+{
+  "irVersion": "1.0",
+  "project": "omniavatar",
+  "repository": "https://github.com/plexusone/omniavatar",
+  "versioning": "semver",
+  "commitConvention": "conventional",
+  "maintainers": ["grokify", "johncwang@gmail.com"],
+  "releases": [
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-12",
+      "highlights": [
+        { "description": "Initial release with HeyGen, Tavus, and bitHuman providers" },
+        { "description": "Priority-based provider registry with auto-registration via init()" },
+        { "description": "LiveKit token generation for avatar participants" }
+      ],
+      "added": [
+        { "description": "`RegisterAvatarProvider()` for registering avatar provider factories" },
+        { "description": "`GetAvatarProvider()` for retrieving registered providers by name" },
+        { "description": "`ListAvatarProviders()` for discovering available providers" },
+        { "description": "`HasAvatarProvider()` for checking provider registration" },
+        { "description": "`GenerateAvatarToken()` for creating LiveKit tokens with avatar metadata" },
+        { "description": "`LiveKitStartOptions` struct for platform-specific session initialization" },
+        { "description": "`PriorityThin` (0) and `PriorityThick` (10) registration priority constants" },
+        { "description": "`providers/heygen`: HeyGen LiveAvatar provider with LITE mode support" },
+        { "description": "`providers/tavus`: Tavus Conversational Video provider with PAL support" },
+        { "description": "`providers/bithuman`: bitHuman Real-time Avatars provider" },
+        { "description": "`providers/all`: Convenience blank import for all providers" }
+      ],
+      "documentation": [
+        { "description": "README.md with architecture, quick start, and provider details" },
+        { "description": "Package documentation in doc.go with usage examples" },
+        { "description": "docs/releases/v0.1.0.md release notes" }
+      ]
+    }
+  ]
+}
