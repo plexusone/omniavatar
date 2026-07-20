@@ -7,6 +7,31 @@
   "maintainers": ["grokify", "johncwang@gmail.com"],
   "releases": [
     {
+      "version": "v0.2.0",
+      "date": "2026-07-16",
+      "highlights": [
+        { "description": "Render providers for all three vendors: generate a talking-head MP4 from narration audio via HeyGen, Tavus, or bitHuman" },
+        { "description": "HeyGen and bitHuman render providers implement `render.AudioUploader` for uploading local narration files" },
+        { "description": "Symmetric registry API: `GetLiveProvider` / `GetRenderProvider`" }
+      ],
+      "changed": [
+        { "description": "BREAKING: registry functions renamed for surface symmetry: `RegisterAvatarProvider` → `RegisterLiveProvider`, `GetAvatarProvider` → `GetLiveProvider`, `ListAvatarProviders` → `ListLiveProviders`, `HasAvatarProvider` → `HasLiveProvider`, `GetAvatarProviderPriority` → `GetLiveProviderPriority`", "breaking": true },
+        { "description": "BREAKING: requires omniavatar-core v0.3.0 (package `avatar` renamed to `live`; render `AvatarLister`/helpers)", "breaking": true }
+      ],
+      "added": [
+        { "description": "Render registry API: `RegisterRenderProvider`, `GetRenderProvider`, `ListRenderProviders`, `HasRenderProvider`, `GetRenderProviderPriority`" },
+        { "description": "Render surface for all three vendors — audio-driven talking-head generation via HeyGen, Tavus, and bitHuman. The render adapters live in the provider SDK repos (`heygen-go/omniavatar`, `tavus-go/omniavatar`, `bithuman-go/omniavatar`), depending only on `omniavatar-core`; the batteries `providers/{heygen,tavus,bithuman}` packages register them alongside the live adapters" },
+        { "description": "HeyGen and bitHuman render adapters implement `render.AudioUploader`; the HeyGen adapter implements `render.AvatarLister` (v2 avatars)" },
+        { "description": "All providers register both live and render surfaces via `providers/all`" },
+        { "description": "Unit tests for the live/render registry surfaces" }
+      ],
+      "documentation": [
+        { "description": "README.md and doc.go updated with quick starts for both surfaces and per-provider render options" },
+        { "description": "Render specs added under `docs/specs/render/` (PRD, TRD, PLAN, ROADMAP)" },
+        { "description": "MkDocs site added (getting started, provider pages, architecture/LiveKit/render-lifecycle guides, specs, releases) with a `Docs` GitHub Actions workflow deploying via `mkdocs gh-deploy`" }
+      ]
+    },
+    {
       "version": "v0.1.0",
       "date": "2026-07-12",
       "highlights": [
