@@ -27,3 +27,6 @@ go.work.sum
 
 # Ideation notes
 IDEATION_CHAT*.md
+
+# MkDocs generated site
+/site/
