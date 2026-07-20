@@ -15,20 +15,22 @@
         { "description": "Symmetric registry API: `GetLiveProvider` / `GetRenderProvider`" }
       ],
       "changed": [
-        { "description": "BREAKING: registry functions renamed for surface symmetry: `RegisterAvatarProvider` → `RegisterLiveProvider`, `GetAvatarProvider` → `GetLiveProvider`, `ListAvatarProviders` → `ListLiveProviders`, `HasAvatarProvider` → `HasLiveProvider`, `GetAvatarProviderPriority` → `GetLiveProviderPriority`", "breaking": true },
-        { "description": "BREAKING: requires omniavatar-core v0.3.0 (package `avatar` renamed to `live`; render `AvatarLister`/helpers)", "breaking": true }
+        { "description": "registry functions renamed for surface symmetry: `RegisterAvatarProvider` → `RegisterLiveProvider`, `GetAvatarProvider` → `GetLiveProvider`, `ListAvatarProviders` → `ListLiveProviders`, `HasAvatarProvider` → `HasLiveProvider`, `GetAvatarProviderPriority` → `GetLiveProviderPriority`", "breaking": true, "commit": "9a3c4d4" },
+        { "description": "requires omniavatar-core v0.3.0 (package `avatar` renamed to `live`; render `AvatarLister`/helpers)", "breaking": true, "commit": "464ab53" }
       ],
       "added": [
-        { "description": "Render registry API: `RegisterRenderProvider`, `GetRenderProvider`, `ListRenderProviders`, `HasRenderProvider`, `GetRenderProviderPriority`" },
-        { "description": "Render surface for all three vendors — audio-driven talking-head generation via HeyGen, Tavus, and bitHuman. The render adapters live in the provider SDK repos (`heygen-go/omniavatar`, `tavus-go/omniavatar`, `bithuman-go/omniavatar`), depending only on `omniavatar-core`; the batteries `providers/{heygen,tavus,bithuman}` packages register them alongside the live adapters" },
-        { "description": "HeyGen and bitHuman render adapters implement `render.AudioUploader`; the HeyGen adapter implements `render.AvatarLister` (v2 avatars)" },
-        { "description": "All providers register both live and render surfaces via `providers/all`" },
-        { "description": "Unit tests for the live/render registry surfaces" }
+        { "description": "Render registry API: `RegisterRenderProvider`, `GetRenderProvider`, `ListRenderProviders`, `HasRenderProvider`, `GetRenderProviderPriority`", "commit": "9a3c4d4" },
+        { "description": "Render surface for all three vendors — audio-driven talking-head generation via HeyGen, Tavus, and bitHuman. The render adapters live in the provider SDK repos (`heygen-go/omniavatar`, `tavus-go/omniavatar`, `bithuman-go/omniavatar`), depending only on `omniavatar-core`; the batteries `providers/{heygen,tavus,bithuman}` packages register them alongside the live adapters", "commit": "9a3c4d4" },
+        { "description": "HeyGen and bitHuman render adapters implement `render.AudioUploader`; the HeyGen adapter implements `render.AvatarLister` (v2 avatars)", "commit": "9a3c4d4" },
+        { "description": "All providers register both live and render surfaces via `providers/all`", "commit": "9a3c4d4" },
+        { "description": "`render-basic` example generating a talking-head video from narration audio via any registered render provider", "commit": "5461d66" },
+        { "description": "Unit tests for the live/render registry surfaces", "commit": "8e6e9aa" }
       ],
       "documentation": [
-        { "description": "README.md and doc.go updated with quick starts for both surfaces and per-provider render options" },
-        { "description": "Render specs added under `docs/specs/render/` (PRD, TRD, PLAN, ROADMAP)" },
-        { "description": "MkDocs site added (getting started, provider pages, architecture/LiveKit/render-lifecycle guides, specs, releases) with a `Docs` GitHub Actions workflow deploying via `mkdocs gh-deploy`" }
+        { "description": "README.md and doc.go updated with quick starts for both surfaces and per-provider render options", "commit": "fbf21e8" },
+        { "description": "Render specs added under `docs/specs/render/` (PRD, TRD, PLAN, ROADMAP)", "commit": "b51daa9" },
+        { "description": "MkDocs site (getting started, provider pages, architecture/LiveKit/render-lifecycle guides, specs, releases)", "commit": "881ead4" },
+        { "description": "`Docs` GitHub Actions workflow deploying the site via `mkdocs gh-deploy`", "commit": "d89d52f" }
       ]
     },
     {
