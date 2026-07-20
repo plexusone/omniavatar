@@ -8,7 +8,7 @@ import (
 	bithumansdk "github.com/plexusone/bithuman-go"
 	"github.com/plexusone/bithuman-go/api"
 
-	"github.com/plexusone/omniavatar-core/avatar"
+	"github.com/plexusone/omniavatar-core/live"
 )
 
 // Client wraps the bithuman-go SDK for avatar session management.
@@ -34,7 +34,7 @@ type ClientConfig struct {
 // NewClient creates a new bitHuman API client using the bithuman-go SDK.
 func NewClient(cfg ClientConfig) (*Client, error) {
 	if cfg.APIKey == "" {
-		return nil, avatar.ErrInvalidConfig
+		return nil, live.ErrInvalidConfig
 	}
 
 	var opts []bithumansdk.Option
@@ -88,7 +88,7 @@ type CreateSessionResponse struct {
 // CreateSession creates a new real-time session with the bitHuman API.
 func (c *Client) CreateSession(ctx context.Context, req CreateSessionRequest) (*CreateSessionResponse, error) {
 	if req.AgentID == "" {
-		return nil, avatar.ErrInvalidConfig
+		return nil, live.ErrInvalidConfig
 	}
 
 	apiReq := &api.CreateSessionRequest{
@@ -104,7 +104,7 @@ func (c *Client) CreateSession(ctx context.Context, req CreateSessionRequest) (*
 
 	resp, err := c.sdk.Sessions().Create(ctx, apiReq)
 	if err != nil {
-		return nil, avatar.NewProviderError("bithuman", "create_session", err)
+		return nil, live.NewProviderError("bithuman", "create_session", err)
 	}
 
 	result := &CreateSessionResponse{
@@ -124,11 +124,11 @@ func (c *Client) CreateSession(ctx context.Context, req CreateSessionRequest) (*
 // EndSession ends an active session.
 func (c *Client) EndSession(ctx context.Context, sessionID string) error {
 	if sessionID == "" {
-		return avatar.ErrInvalidConfig
+		return live.ErrInvalidConfig
 	}
 
 	if err := c.sdk.Sessions().End(ctx, sessionID); err != nil {
-		return avatar.NewProviderError("bithuman", "end_session", err)
+		return live.NewProviderError("bithuman", "end_session", err)
 	}
 
 	return nil

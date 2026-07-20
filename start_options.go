@@ -3,7 +3,7 @@ package omniavatar
 import (
 	lksdk "github.com/livekit/server-sdk-go/v2"
 
-	"github.com/plexusone/omniavatar-core/avatar"
+	"github.com/plexusone/omniavatar-core/live"
 )
 
 // LiveKitStartOptions contains LiveKit-specific start options for avatar sessions.
@@ -34,30 +34,30 @@ type LiveKitStartOptions struct {
 	LiveKitAPISecret string
 
 	// Callbacks configures optional event callbacks.
-	Callbacks *avatar.SessionCallbacks
+	Callbacks *live.SessionCallbacks
 
 	// AudioDestination is the audio output for streaming TTS audio.
 	// If provided, the session will use this instead of creating its own.
 	// Optional.
-	AudioDestination avatar.AudioDestination
+	AudioDestination live.AudioDestination
 }
 
 // Validate checks that all required fields are set.
 func (o *LiveKitStartOptions) Validate() error {
 	if o.Room == nil {
-		return avatar.ErrInvalidConfig
+		return live.ErrInvalidConfig
 	}
 	if o.AgentIdentity == "" {
-		return avatar.ErrInvalidConfig
+		return live.ErrInvalidConfig
 	}
 	if o.LiveKitURL == "" {
-		return avatar.ErrInvalidConfig
+		return live.ErrInvalidConfig
 	}
 	if o.LiveKitAPIKey == "" {
-		return avatar.ErrInvalidConfig
+		return live.ErrInvalidConfig
 	}
 	if o.LiveKitAPISecret == "" {
-		return avatar.ErrInvalidConfig
+		return live.ErrInvalidConfig
 	}
 	return nil
 }

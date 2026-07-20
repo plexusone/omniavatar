@@ -5,7 +5,7 @@ import (
 
 	"github.com/livekit/protocol/auth"
 
-	"github.com/plexusone/omniavatar-core/avatar"
+	"github.com/plexusone/omniavatar-core/live"
 )
 
 // TokenOptions configures avatar token generation.
@@ -50,13 +50,13 @@ type TokenOptions struct {
 // came from the agent participant.
 func GenerateAvatarToken(opts TokenOptions) (string, error) {
 	if opts.APIKey == "" || opts.APISecret == "" {
-		return "", avatar.ErrInvalidConfig
+		return "", live.ErrInvalidConfig
 	}
 	if opts.RoomName == "" || opts.AvatarIdentity == "" {
-		return "", avatar.ErrInvalidConfig
+		return "", live.ErrInvalidConfig
 	}
 	if opts.PublishOnBehalf == "" {
-		return "", avatar.ErrInvalidConfig
+		return "", live.ErrInvalidConfig
 	}
 
 	ttl := opts.TTL

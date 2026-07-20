@@ -13,7 +13,7 @@
 //	)
 //
 //	func main() {
-//	    provider, err := omniavatar.GetAvatarProvider("heygen",
+//	    provider, err := omniavatar.GetLiveProvider("heygen",
 //	        omniavatar.WithAPIKey(os.Getenv("HEYGEN_API_KEY")),
 //	        omniavatar.WithExtension("avatar_id", avatarID),
 //	        omniavatar.WithExtension("sandbox", true))

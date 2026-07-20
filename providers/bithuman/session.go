@@ -11,7 +11,7 @@ import (
 	lksdk "github.com/livekit/server-sdk-go/v2"
 
 	"github.com/plexusone/omniavatar"
-	"github.com/plexusone/omniavatar-core/avatar"
+	"github.com/plexusone/omniavatar-core/live"
 )
 
 // SessionConfig configures a bitHuman avatar session.
@@ -25,14 +25,14 @@ type SessionConfig struct {
 	AgentID string
 
 	// AudioConfig configures the audio format.
-	AudioConfig avatar.AudioConfig
+	AudioConfig live.AudioConfig
 }
 
-// Session implements avatar.Session for bitHuman avatars.
+// Session implements live.Session for bitHuman avatars.
 type Session struct {
 	client      *Client
 	agentID     string
-	audioConfig avatar.AudioConfig
+	audioConfig live.AudioConfig
 
 	// Session identity and state
 	identity  string
@@ -42,10 +42,10 @@ type Session struct {
 	room *lksdk.Room
 
 	// Audio output (set externally or through opts)
-	audioOutput avatar.AudioDestination
+	audioOutput live.AudioDestination
 
 	// Callbacks
-	callbacks *avatar.SessionCallbacks
+	callbacks *live.SessionCallbacks
 
 	// State tracking
 	started   bool
@@ -62,15 +62,15 @@ type Session struct {
 // NewSession creates a new bitHuman avatar session.
 func NewSession(cfg SessionConfig) (*Session, error) {
 	if cfg.Client == nil {
-		return nil, avatar.ErrInvalidConfig
+		return nil, live.ErrInvalidConfig
 	}
 	if cfg.AgentID == "" {
-		return nil, avatar.ErrInvalidConfig
+		return nil, live.ErrInvalidConfig
 	}
 
 	audioConfig := cfg.AudioConfig
 	if audioConfig.SampleRate == 0 {
-		audioConfig = avatar.DefaultAudioConfig()
+		audioConfig = live.DefaultAudioConfig()
 	}
 
 	// Generate a unique avatar identity
@@ -112,7 +112,7 @@ func (s *Session) Start(ctx context.Context, opts any) error {
 	s.mu.Lock()
 	if s.started {
 		s.mu.Unlock()
-		return avatar.ErrSessionAlreadyStarted
+		return live.ErrSessionAlreadyStarted
 	}
 	s.mu.Unlock()
 
@@ -164,13 +164,13 @@ func (s *Session) WaitForJoin(ctx context.Context, timeout time.Duration) error 
 	s.mu.Lock()
 	if !s.started {
 		s.mu.Unlock()
-		return avatar.ErrSessionNotStarted
+		return live.ErrSessionNotStarted
 	}
 	room := s.room
 	s.mu.Unlock()
 
 	if room == nil {
-		return avatar.ErrSessionNotStarted
+		return live.ErrSessionNotStarted
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
@@ -204,7 +204,7 @@ func (s *Session) WaitForJoin(ctx context.Context, timeout time.Duration) error 
 			// Continue polling
 		case <-ctx.Done():
 			if ctx.Err() == context.DeadlineExceeded {
-				return avatar.ErrAvatarJoinTimeout
+				return live.ErrAvatarJoinTimeout
 			}
 			return ctx.Err()
 		}
@@ -212,14 +212,14 @@ func (s *Session) WaitForJoin(ctx context.Context, timeout time.Duration) error 
 }
 
 // AudioOutput returns the audio destination for streaming TTS audio.
-func (s *Session) AudioOutput() avatar.AudioDestination {
+func (s *Session) AudioOutput() live.AudioDestination {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return s.audioOutput
 }
 
 // SetAudioOutput sets the audio destination.
-func (s *Session) SetAudioOutput(out avatar.AudioDestination) {
+func (s *Session) SetAudioOutput(out live.AudioDestination) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.audioOutput = out
@@ -268,7 +268,7 @@ func (s *Session) Close(ctx context.Context) error {
 }
 
 // SetCallbacks registers event callbacks for the session.
-func (s *Session) SetCallbacks(callbacks *avatar.SessionCallbacks) {
+func (s *Session) SetCallbacks(callbacks *live.SessionCallbacks) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.callbacks = callbacks
@@ -334,4 +334,4 @@ func (s *Session) Room() *lksdk.Room {
 }
 
 // Verify interface compliance at compile time.
-var _ avatar.Session = (*Session)(nil)
+var _ live.Session = (*Session)(nil)

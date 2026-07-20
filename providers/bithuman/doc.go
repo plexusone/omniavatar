@@ -13,7 +13,7 @@
 //	)
 //
 //	func main() {
-//	    provider, err := omniavatar.GetAvatarProvider("bithuman",
+//	    provider, err := omniavatar.GetLiveProvider("bithuman",
 //	        omniavatar.WithAPIKey(os.Getenv("BITHUMAN_API_KEY")),
 //	        omniavatar.WithExtension("agent_id", agentID))
 //	}

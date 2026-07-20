@@ -8,7 +8,7 @@ import (
 	tavussdk "github.com/plexusone/tavus-go"
 	"github.com/plexusone/tavus-go/api"
 
-	"github.com/plexusone/omniavatar-core/avatar"
+	"github.com/plexusone/omniavatar-core/live"
 )
 
 // DefaultPalID is the stock Tavus PAL for testing.
@@ -37,7 +37,7 @@ type ClientConfig struct {
 // NewClient creates a new Tavus API client using the tavus-go SDK.
 func NewClient(cfg ClientConfig) (*Client, error) {
 	if cfg.APIKey == "" {
-		return nil, avatar.ErrInvalidConfig
+		return nil, live.ErrInvalidConfig
 	}
 
 	var opts []tavussdk.Option
@@ -116,7 +116,7 @@ func (c *Client) CreateConversation(ctx context.Context, req CreateConversationR
 
 	resp, err := c.sdk.Conversations().Create(ctx, apiReq)
 	if err != nil {
-		return nil, avatar.NewProviderError("tavus", "create_conversation", err)
+		return nil, live.NewProviderError("tavus", "create_conversation", err)
 	}
 
 	result := &CreateConversationResponse{
@@ -133,11 +133,11 @@ func (c *Client) CreateConversation(ctx context.Context, req CreateConversationR
 // EndConversation ends an active conversation.
 func (c *Client) EndConversation(ctx context.Context, conversationID string) error {
 	if conversationID == "" {
-		return avatar.ErrInvalidConfig
+		return live.ErrInvalidConfig
 	}
 
 	if err := c.sdk.Conversations().End(ctx, conversationID); err != nil {
-		return avatar.NewProviderError("tavus", "end_conversation", err)
+		return live.NewProviderError("tavus", "end_conversation", err)
 	}
 
 	return nil

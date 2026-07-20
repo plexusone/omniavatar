@@ -1,7 +1,7 @@
 package bithuman
 
 import (
-	"github.com/plexusone/omniavatar-core/avatar"
+	"github.com/plexusone/omniavatar-core/live"
 )
 
 // Config configures the bitHuman avatar provider.
@@ -19,7 +19,7 @@ type Config struct {
 	AgentID string
 }
 
-// Provider implements avatar.Provider for bitHuman.
+// Provider implements live.Provider for bitHuman.
 type Provider struct {
 	client  *Client
 	agentID string
@@ -28,10 +28,10 @@ type Provider struct {
 // NewProvider creates a new bitHuman avatar provider.
 func NewProvider(cfg Config) (*Provider, error) {
 	if cfg.APIKey == "" {
-		return nil, avatar.ErrInvalidConfig
+		return nil, live.ErrInvalidConfig
 	}
 	if cfg.AgentID == "" {
-		return nil, avatar.ErrInvalidConfig
+		return nil, live.ErrInvalidConfig
 	}
 
 	client, err := NewClient(ClientConfig{
@@ -54,10 +54,10 @@ func (p *Provider) Name() string {
 }
 
 // CreateSession creates a new bitHuman avatar session.
-func (p *Provider) CreateSession(cfg avatar.SessionConfig) (avatar.Session, error) {
+func (p *Provider) CreateSession(cfg live.SessionConfig) (live.Session, error) {
 	audioConfig := cfg.AudioConfig
 	if audioConfig.SampleRate == 0 {
-		audioConfig = avatar.DefaultAudioConfig()
+		audioConfig = live.DefaultAudioConfig()
 	}
 
 	return NewSession(SessionConfig{
@@ -68,4 +68,4 @@ func (p *Provider) CreateSession(cfg avatar.SessionConfig) (avatar.Session, erro
 }
 
 // Verify interface compliance at compile time.
-var _ avatar.Provider = (*Provider)(nil)
+var _ live.Provider = (*Provider)(nil)

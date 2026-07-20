@@ -1,17 +1,22 @@
 package heygen
 
 import (
+	heygenrender "github.com/plexusone/heygen-go/omniavatar"
+
 	"github.com/plexusone/omniavatar"
-	"github.com/plexusone/omniavatar-core/avatar"
+	"github.com/plexusone/omniavatar-core/live"
 	"github.com/plexusone/omniavatar-core/registry"
 )
 
 func init() {
-	omniavatar.RegisterAvatarProvider("heygen", NewProviderFromConfig, omniavatar.PriorityThick)
+	omniavatar.RegisterLiveProvider("heygen", NewProviderFromConfig, omniavatar.PriorityThick)
+	// The render provider lives in the heygen-go SDK (core-only, no LiveKit).
+	omniavatar.RegisterRenderProvider("heygen", heygenrender.NewRenderProviderFromConfig, omniavatar.PriorityThick)
 }
 
-// NewProviderFromConfig creates a HeyGen provider from registry config.
-func NewProviderFromConfig(cfg registry.ProviderConfig) (avatar.Provider, error) {
+// NewProviderFromConfig creates a HeyGen live provider from registry config.
+// The live provider uses the LiveAvatar API key (LIVEAVATAR_API_KEY).
+func NewProviderFromConfig(cfg registry.ProviderConfig) (live.Provider, error) {
 	return NewProvider(Config{
 		APIKey:       cfg.APIKey,
 		BaseURL:      cfg.BaseURL,

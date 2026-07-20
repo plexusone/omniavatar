@@ -13,7 +13,7 @@
 //	)
 //
 //	func main() {
-//	    provider, err := omniavatar.GetAvatarProvider("tavus",
+//	    provider, err := omniavatar.GetLiveProvider("tavus",
 //	        omniavatar.WithAPIKey(os.Getenv("TAVUS_API_KEY")),
 //	        omniavatar.WithExtension("pal_id", palID))
 //	}
