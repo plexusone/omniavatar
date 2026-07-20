@@ -63,9 +63,9 @@ Out of scope (see [ROADMAP.md](ROADMAP.md)): D-ID, webhooks, orchestrator-integr
 
 ## Sequencing and Release
 
-1. Land + tag `omniavatar-core v0.2.0` (rename + render interfaces) and `heygen-go v0.2.0` (asset upload) — independent, any order.
-2. Bump `omniavatar` to `omniavatar-core v0.2.0` and `heygen-go v0.2.0`, land providers, tag `omniavatar v0.2.0`.
-3. Bump `videoascode` go.mod from the v0.1.0 placeholders to `omniavatar v0.2.0` / `omniavatar-core v0.2.0`, run `go mod tidy`, tag `videoascode v0.7.0`.
+1. Land + tag `omniavatar-core v0.3.0` (rename + render interfaces) and `heygen-go v0.2.0` (asset upload) — independent, any order.
+2. Bump `omniavatar` to `omniavatar-core v0.3.0` and `heygen-go v0.2.0`, land providers, tag `omniavatar v0.2.0`.
+3. Bump `videoascode` go.mod from the v0.1.0 placeholders to `omniavatar v0.2.0` / `omniavatar-core v0.3.0`, run `go mod tidy`, tag `videoascode v0.7.0`.
 4. Per house rules: push commits, wait for CI green, then tag.
 
 Local development uses `go.work` files (not committed) spanning the repos instead of `replace` directives. Note: `videoascode` CI will not pass until step 2's tags exist, because its go.mod pins v0.1.0 while the code needs the workspace-supplied v0.2.0 interfaces.
