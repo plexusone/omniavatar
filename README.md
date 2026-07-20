@@ -4,6 +4,7 @@
 [![Go Lint][go-lint-svg]][go-lint-url]
 [![Go SAST][go-sast-svg]][go-sast-url]
 [![Docs][docs-godoc-svg]][docs-godoc-url]
+[![Docs][docs-mkdoc-svg]][docs-mkdoc-url]
 [![Visualization][viz-svg]][viz-url]
 [![License][license-svg]][license-url]
 
@@ -24,29 +25,35 @@
  [license-svg]: https://img.shields.io/badge/license-MIT-blue.svg
  [license-url]: https://github.com/plexusone/omniavatar/blob/main/LICENSE
 
-Batteries-included package for real-time AI avatars. Provides provider implementations for HeyGen, Tavus, and bitHuman.
+Batteries-included package for AI avatars with two surfaces:
+
+- **live** — real-time streaming avatars (LiveKit sessions, PCM audio streaming for lip-sync) for conversational agents
+- **render** — asynchronous batch avatar video generation (narration audio in, talking-head MP4 out) for offline pipelines such as presentation videos
+
+Provides provider implementations for HeyGen, Tavus, and bitHuman.
 
 For core interfaces only (no provider dependencies), see [omniavatar-core](https://github.com/plexusone/omniavatar-core).
 
-## Quick Start
+## Quick Start (live)
 
 ```go
 import (
     "github.com/plexusone/omniavatar"
+    "github.com/plexusone/omniavatar-core/live"
     _ "github.com/plexusone/omniavatar/providers/all"
 )
 
 func main() {
-    provider, err := omniavatar.GetAvatarProvider("heygen",
-        omniavatar.WithAPIKey(os.Getenv("HEYGEN_API_KEY")),
+    provider, err := omniavatar.GetLiveProvider("heygen",
+        omniavatar.WithAPIKey(os.Getenv("LIVEAVATAR_API_KEY")),
         omniavatar.WithExtension("avatar_id", avatarID),
         omniavatar.WithExtension("sandbox", true))
     if err != nil {
         log.Fatal(err)
     }
 
-    session, err := provider.CreateSession(avatar.SessionConfig{
-        AudioConfig: avatar.DefaultAudioConfig(),
+    session, err := provider.CreateSession(live.SessionConfig{
+        AudioConfig: live.DefaultAudioConfig(),
     })
     if err != nil {
         log.Fatal(err)
@@ -63,26 +70,87 @@ func main() {
 }
 ```
 
+## Quick Start (render)
+
+```go
+import (
+    "github.com/plexusone/omniavatar"
+    "github.com/plexusone/omniavatar-core/render"
+    _ "github.com/plexusone/omniavatar/providers/all"
+)
+
+func main() {
+    provider, err := omniavatar.GetRenderProvider("bithuman",
+        omniavatar.WithAPIKey(os.Getenv("BITHUMAN_API_KEY")),
+        omniavatar.WithExtension("agent_id", agentID))
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Providers with hosting support can upload local narration audio.
+    audioURL := ""
+    if up, ok := provider.(render.AudioUploader); ok {
+        audioURL, err = up.UploadAudio(ctx, "narration.mp3", audioFile)
+        if err != nil {
+            log.Fatal(err)
+        }
+    }
+
+    job, err := provider.Generate(ctx, render.GenerateRequest{
+        AvatarID: agentID,
+        AudioURL: audioURL,
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    status, err := render.Wait(ctx, provider, job.ID, 5*time.Second)
+    if err != nil {
+        log.Fatal(err)
+    }
+    log.Printf("video ready: %s (%.1fs)", status.VideoURL, status.Duration)
+
+    out, err := os.Create("presenter.mp4")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer out.Close()
+
+    if err := provider.Download(ctx, job.ID, out); err != nil {
+        log.Fatal(err)
+    }
+}
+```
+
 ## Architecture
 
-```
-omniavatar-core/              # Core interfaces (no provider deps)
-├── avatar/
-│   ├── provider.go           # Provider interface
-│   ├── session.go            # Session interface
-│   └── audio.go              # AudioDestination interface
-└── registry/
-    └── registry.go           # Factory types
+Adapters follow the PlexusOne convention: **render** adapters live in each
+provider SDK repo (`heygen-go/omniavatar`, …), depending only on
+`omniavatar-core`, so provider-specific knowledge stays with the SDK. The
+**live** adapters live here in the batteries-included package, because their
+LiveKit integration (`LiveKitStartOptions`, token generation) lives here.
+This package re-exports both, registered by name via `providers/all`.
 
-omniavatar/                   # Provider implementations (this package)
-├── registry.go               # Global registry
-├── token.go                  # LiveKit token generation
-├── start_options.go          # LiveKitStartOptions
+```
+omniavatar-core/              # Core interfaces + shared helpers (no provider deps)
+├── live/                     # Real-time session interfaces
+├── render/                   # Batch generation: Provider, AudioUploader,
+│                             #   AvatarLister, GenerateRequest, Wait,
+│                             #   AudioContentType/DownloadURL helpers
+└── registry/                 # Factory types
+
+heygen-go/omniavatar/         # HeyGen RENDER adapter (core-only) — in the SDK repo
+tavus-go/omniavatar/          # Tavus RENDER adapter
+bithuman-go/omniavatar/       # bitHuman RENDER adapter
+
+omniavatar/                   # Batteries-included (this package)
+├── registry.go               # Global live + render registries
+├── token.go / start_options.go  # LiveKit token + start options
 └── providers/
-    ├── heygen/               # HeyGen LiveAvatar
-    ├── tavus/                # Tavus Conversational Video
-    ├── bithuman/             # bitHuman Real-time Avatars
-    └── all/                  # Convenience import
+    ├── heygen/               # HeyGen LIVE adapter (LiveAvatar); registers the SDK render adapter
+    ├── tavus/                # Tavus LIVE adapter (CVI)
+    ├── bithuman/             # bitHuman LIVE adapter
+    └── all/                  # Convenience import (registers every provider)
 ```
 
 ## Provider Registry
@@ -100,7 +168,7 @@ Higher priority providers override lower priority registrations for the same nam
 
 ### Auto-Registration
 
-Providers auto-register via `init()` when imported:
+Providers auto-register both surfaces via `init()` when imported:
 
 ```go
 // Import specific provider
@@ -113,80 +181,135 @@ import _ "github.com/plexusone/omniavatar/providers/all"
 ### Registry Functions
 
 ```go
-// Get a provider by name
-provider, err := omniavatar.GetAvatarProvider("heygen", opts...)
+// Live (real-time sessions)
+provider, err := omniavatar.GetLiveProvider("heygen", opts...)
+names := omniavatar.ListLiveProviders()
+ok := omniavatar.HasLiveProvider("heygen")
 
-// List all registered providers
-names := omniavatar.ListAvatarProviders()
-
-// Check if provider is registered
-if omniavatar.HasAvatarProvider("heygen") {
-    // ...
-}
+// Render (batch video generation)
+provider, err := omniavatar.GetRenderProvider("heygen", opts...)
+names := omniavatar.ListRenderProviders()
+ok := omniavatar.HasRenderProvider("heygen")
 ```
 
 ## Supported Providers
 
-### HeyGen LiveAvatar
+### HeyGen
 
-Real-time avatar with lip-sync using HeyGen's LITE mode.
+Live: real-time avatar with lip-sync using HeyGen LiveAvatar LITE mode.
+Render: HeyGen Video Generation API (v2).
+
+Note: the live surface uses the **LiveAvatar API key** (`LIVEAVATAR_API_KEY`);
+the render surface uses the **HeyGen API key** (`HEYGEN_API_KEY`). They are
+different credentials.
 
 ```go
-provider, err := omniavatar.GetAvatarProvider("heygen",
-    omniavatar.WithAPIKey(os.Getenv("HEYGEN_API_KEY")),
+// Live
+provider, err := omniavatar.GetLiveProvider("heygen",
+    omniavatar.WithAPIKey(os.Getenv("LIVEAVATAR_API_KEY")),
     omniavatar.WithExtension("avatar_id", "josh_lite3_20230714"),
     omniavatar.WithExtension("sandbox", true),           // 60s limit, no credits
     omniavatar.WithExtension("video_quality", "high"),   // very_high, high, medium, low
 )
-```
 
-| Option | Description |
-|--------|-------------|
-| `avatar_id` | Avatar UUID (required) |
-| `sandbox` | Enable sandbox mode (recommended for dev) |
-| `video_quality` | Video quality preset |
-
-### Tavus Conversational Video
-
-Real-time avatar using Tavus PAL (Personalized AI Likeness).
-
-```go
-provider, err := omniavatar.GetAvatarProvider("tavus",
-    omniavatar.WithAPIKey(os.Getenv("TAVUS_API_KEY")),
-    omniavatar.WithExtension("pal_id", "pal_xxx"),  // Optional
-    omniavatar.WithExtension("face_id", "face_xxx"), // Optional
+// Render
+provider, err := omniavatar.GetRenderProvider("heygen",
+    omniavatar.WithAPIKey(os.Getenv("HEYGEN_API_KEY")),
+    omniavatar.WithExtension("avatar_id", avatarID),
 )
 ```
 
-| Option | Description |
-|--------|-------------|
-| `pal_id` | PAL ID (optional, uses stock avatar if not set) |
-| `face_id` | Face override (optional) |
+| Surface | Option | Description |
+|---------|--------|-------------|
+| live | `avatar_id` | Avatar UUID (required) |
+| live | `sandbox` | Enable sandbox mode (recommended for dev) |
+| live | `video_quality` | Video quality preset |
+| render | `avatar_id` | Default avatar ID |
+| render | `upload_base_url` | Custom asset upload service URL (default: upload.heygen.com) |
+| render request | `talking_photo_id` | Use a talking photo instead of an avatar |
+| render request | `avatar_style` | normal, circle, closeUp |
+| render request | `voice_id` | TTS voice for Script input |
+| render request | `test` | Watermarked test video, no credits |
 
-### bitHuman Real-time Avatars
+The HeyGen render provider implements `render.AudioUploader` via the HeyGen
+asset upload API (MP3/`audio/mpeg` is the documented audio asset type).
 
-Ultra-low latency avatars using bitHuman.
+### Tavus
+
+Live: real-time avatar using Tavus PAL (Personalized AI Likeness).
+Render: Tavus Video Generation using replicas.
 
 ```go
-provider, err := omniavatar.GetAvatarProvider("bithuman",
+// Live
+provider, err := omniavatar.GetLiveProvider("tavus",
+    omniavatar.WithAPIKey(os.Getenv("TAVUS_API_KEY")),
+    omniavatar.WithExtension("pal_id", "pal_xxx"),   // Optional
+    omniavatar.WithExtension("face_id", "face_xxx"), // Optional
+)
+
+// Render
+provider, err := omniavatar.GetRenderProvider("tavus",
+    omniavatar.WithAPIKey(os.Getenv("TAVUS_API_KEY")),
+    omniavatar.WithExtension("replica_id", "rep_xxx"),
+)
+```
+
+| Surface | Option | Description |
+|---------|--------|-------------|
+| live | `pal_id` | PAL ID (optional, uses stock avatar if not set) |
+| live | `face_id` | Face override (optional) |
+| render | `replica_id` | Default replica ID |
+| render request | `fast` | Faster generation (disables some features) |
+| render request | `callback_url` | Completion webhook URL |
+
+Tavus has no audio upload API; supply a publicly fetchable
+`GenerateRequest.AudioURL` (.wav or .mp3).
+
+### bitHuman
+
+Live: ultra-low latency real-time avatars.
+Render: bitHuman video generation, including audio upload support
+(`render.AudioUploader`).
+
+```go
+// Live
+provider, err := omniavatar.GetLiveProvider("bithuman",
+    omniavatar.WithAPIKey(os.Getenv("BITHUMAN_API_KEY")),
+    omniavatar.WithExtension("agent_id", "agent_xxx"),
+)
+
+// Render
+provider, err := omniavatar.GetRenderProvider("bithuman",
     omniavatar.WithAPIKey(os.Getenv("BITHUMAN_API_KEY")),
     omniavatar.WithExtension("agent_id", "agent_xxx"),
 )
 ```
 
-| Option | Description |
-|--------|-------------|
-| `agent_id` | bitHuman agent ID (required) |
+| Surface | Option | Description |
+|---------|--------|-------------|
+| live | `agent_id` | bitHuman agent ID (required) |
+| render | `agent_id` | Default agent ID |
+| render request | `voice_id` | TTS voice for Script input |
 
-## Session Lifecycle
+## Session Lifecycle (live)
 
 ```
-1. Get Provider    → omniavatar.GetAvatarProvider("heygen", opts...)
+1. Get Provider    → omniavatar.GetLiveProvider("heygen", opts...)
 2. Create Session  → provider.CreateSession(cfg)
 3. Start           → session.Start(ctx, &LiveKitStartOptions{...})
 4. Wait for Join   → session.WaitForJoin(ctx, 30*time.Second)
 5. Stream Audio    → session.AudioOutput().CaptureFrame(ctx, pcm)
 6. Close           → session.Close(ctx)
+```
+
+## Job Lifecycle (render)
+
+```
+1. Get Provider    → omniavatar.GetRenderProvider("heygen", opts...)
+2. Upload Audio    → provider.(render.AudioUploader).UploadAudio(...)  [optional]
+3. Generate        → provider.Generate(ctx, render.GenerateRequest{...})
+4. Wait            → render.Wait(ctx, provider, job.ID, interval)
+5. Download        → provider.Download(ctx, job.ID, dst)
 ```
 
 ## LiveKit Integration
@@ -219,7 +342,7 @@ type LiveKitStartOptions struct {
 }
 ```
 
-## Audio Format
+## Audio Format (live)
 
 Default audio configuration:
 
@@ -231,15 +354,23 @@ Default audio configuration:
 
 ## Provider Comparison
 
-| Provider | Latency | Video Quality | Voice Cloning |
-|----------|---------|---------------|---------------|
-| HeyGen | ~500ms | Excellent | Yes |
-| Tavus | ~300ms | Excellent | Yes (via PAL) |
-| bitHuman | ~200ms | Good | No |
+| Provider | Live Latency | Video Quality | Voice Cloning | Render Audio Upload |
+|----------|--------------|---------------|---------------|---------------------|
+| HeyGen | ~500ms | Excellent | Yes | Yes (asset API, MP3) |
+| Tavus | ~300ms | Excellent | Yes (via PAL) | No (URL only) |
+| bitHuman | ~200ms | Good | No | Yes |
+
+## Specs
+
+- [Render PRD](docs/specs/render/PRD.md)
+- [Render TRD](docs/specs/render/TRD.md)
+- [Render Plan](docs/specs/render/PLAN.md)
+- [Render Roadmap](docs/specs/render/ROADMAP.md)
 
 ## Resources
 
 - [omniavatar-core](https://github.com/plexusone/omniavatar-core) - Core interfaces
 - [HeyGen LiveAvatar](https://liveavatar.com/)
+- [HeyGen API](https://docs.heygen.com/)
 - [Tavus](https://www.tavus.io/)
 - [bitHuman](https://www.bithuman.io/)
