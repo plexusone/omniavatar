@@ -4,7 +4,7 @@ go 1.26.4
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/livekit/protocol v1.50.1
+	github.com/livekit/protocol v1.50.4
 	github.com/livekit/server-sdk-go/v2 v2.18.1
 	github.com/plexusone/bithuman-go v0.2.0
 	github.com/plexusone/heygen-go v0.2.0
