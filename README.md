@@ -30,7 +30,8 @@ Batteries-included package for AI avatars with two surfaces:
 - **live** — real-time streaming avatars (LiveKit sessions, PCM audio streaming for lip-sync) for conversational agents
 - **render** — asynchronous batch avatar video generation (narration audio in, talking-head MP4 out) for offline pipelines such as presentation videos
 
-Provides provider implementations for HeyGen, Tavus, and bitHuman.
+Provides provider implementations for HeyGen, Tavus, bitHuman, and local rendering
+via LivePortrait + JoyVASA (Apple Silicon).
 
 For core interfaces only (no provider dependencies), see [omniavatar-core](https://github.com/plexusone/omniavatar-core).
 
@@ -150,6 +151,7 @@ omniavatar/                   # Batteries-included (this package)
     ├── heygen/               # HeyGen LIVE adapter (LiveAvatar); registers the SDK render adapter
     ├── tavus/                # Tavus LIVE adapter (CVI)
     ├── bithuman/             # bitHuman LIVE adapter
+    ├── liveportrait-joyvasa/ # Local RENDER adapter (Apple Silicon); registers core provider
     └── all/                  # Convenience import (registers every provider)
 ```
 
@@ -290,6 +292,40 @@ provider, err := omniavatar.GetRenderProvider("bithuman",
 | live | `agent_id` | bitHuman agent ID (required) |
 | render | `agent_id` | Default agent ID |
 | render request | `voice_id` | TTS voice for Script input |
+
+### LivePortrait + JoyVASA (Local)
+
+Render-only: on-device audio-driven talking-head video generation on Apple
+Silicon. No cloud API required — connects to a local Python gRPC server.
+
+```go
+// Render (no API key needed)
+provider, err := omniavatar.GetRenderProvider("liveportrait-joyvasa")
+
+// Upload local audio (returns local:// URL)
+audioURL, _ := provider.(render.AudioUploader).UploadAudio(ctx, "narration.wav", f)
+
+job, _ := provider.Generate(ctx, render.GenerateRequest{
+    AvatarID: "john",  // avatar bundle name in ~/.omniavatar/avatars/
+    AudioURL: audioURL,
+    Extensions: map[string]any{
+        "seed":         int64(42),    // deterministic output
+        "motion_scale": float32(1.2), // adjust expressiveness
+    },
+})
+```
+
+| Option | Description |
+|--------|-------------|
+| `endpoint` | Custom Unix socket path (default: `/tmp/omniavatar-liveportrait-joyvasa.sock`) |
+| `seed` | Random seed for deterministic output |
+| `motion_scale` | Facial movement intensity (default: 1.0) |
+
+**Setup:** The provider requires a running Python server. See the
+[omniavatar-core local render guide](https://github.com/plexusone/omniavatar-core/blob/main/docs/local-render.md)
+for server setup and avatar bundle format.
+
+**Performance:** ~5 min for 13.7s output at 512×512 on Apple Silicon (M-series).
 
 ## Session Lifecycle (live)
 
