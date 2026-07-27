@@ -52,6 +52,7 @@ nav:
       - HeyGen: providers/heygen.md
       - Tavus: providers/tavus.md
       - bitHuman: providers/bithuman.md
+      - LivePortrait + JoyVASA (Local): providers/liveportrait-joyvasa.md
   - Guides:
       - Architecture: guides/architecture.md
       - LiveKit Integration: guides/livekit.md
@@ -62,6 +63,7 @@ nav:
       - Render Plan: specs/render/PLAN.md
       - Render Roadmap: specs/render/ROADMAP.md
   - Releases:
+      - v0.3.0: releases/v0.3.0.md
       - v0.2.0: releases/v0.2.0.md
       - v0.1.0: releases/v0.1.0.md
 
