@@ -15,10 +15,12 @@
 package all
 
 import (
-	// HeyGen LiveAvatar provider
-	_ "github.com/plexusone/omniavatar/providers/bithuman"
-	// Tavus Conversational Video provider
-	_ "github.com/plexusone/omniavatar/providers/heygen"
 	// bitHuman Real-time Avatars provider
+	_ "github.com/plexusone/omniavatar/providers/bithuman"
+	// HeyGen LiveAvatar provider
+	_ "github.com/plexusone/omniavatar/providers/heygen"
+	// LivePortrait + JoyVASA local render provider (Apple Silicon)
+	_ "github.com/plexusone/omniavatar/providers/liveportrait-joyvasa"
+	// Tavus Conversational Video provider
 	_ "github.com/plexusone/omniavatar/providers/tavus"
 )
