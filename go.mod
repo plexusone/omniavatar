@@ -8,7 +8,7 @@ require (
 	github.com/livekit/server-sdk-go/v2 v2.18.1
 	github.com/plexusone/bithuman-go v0.2.0
 	github.com/plexusone/heygen-go v0.2.0
-	github.com/plexusone/omniavatar-core v0.3.0
+	github.com/plexusone/omniavatar-core v0.4.0
 	github.com/plexusone/tavus-go v0.3.0
 )
 
